@@ -27,12 +27,30 @@ class Game
     end
 
     def play_game
-        while(@@master.secret_codes != @@cracker.guess_codes)
+        while(@@rounds > 0)
             @@cracker.guess_secret_code
+            give_feedback()
+            if(secret_codes_guessed?)
+                puts "THE CODE HAS BEEN CRACKED!"
+                return
+            end
+            @@rounds -= 1
         end
+        puts "THE CODE DIDN'T BREAK"
     end
     
-
+    def give_feedback()
+        print "Guessed Code is: "
+        @@cracker.guess_codes.each do |code|
+            print "-#{code}"
+        end
+        puts "-"
+        puts ""
+    end
+    
+    def secret_codes_guessed?
+        return (@@master.secret_codes == @@cracker.guess_codes)
+    end
 
     class Master
         attr_reader :secret_codes
@@ -87,6 +105,4 @@ class Computer
         return all_number.split("")
     end
 end
-
-
 Game.new(Human, Computer)

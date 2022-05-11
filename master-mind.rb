@@ -2,7 +2,6 @@ require 'pry-byebug'
 class Game
     @@rounds = 11
     def initialize(player_1_class, player_2_class)
-        @clues = {}
         set_players(player_1_class, player_2_class)
         #print @@master.secret_codes
         puts ""
@@ -14,13 +13,13 @@ class Game
         player_1_mode = gets.chomp.to_i
         if(player_1_mode == 1)
             @@master = Master.new(player_1_class)
-            @@cracker = Cracker.new(player_2_class, @clues)
+            @@cracker = Cracker.new(player_2_class)
 
             puts "Select 4 number from 1 to 6 to set secret code."
             @@master.generate_secret_codes()
         elsif(player_1_mode == 2)
             @@master = Master.new(player_2_class)
-            @@cracker = Cracker.new(player_1_class, @clues)
+            @@cracker = Cracker.new(player_1_class)
 
             @@master.generate_secret_codes()
         end
@@ -43,22 +42,14 @@ class Game
     
     def give_feedback()
         print "Guessed Code is: "
-        @clues = {}
         @@cracker.guess_codes.each_with_index do |code, index|
             print "-#{code}"
-            code_index_in_master = @@master.secret_codes.index(code)
-            if(code_index_in_master)
-                if(index == code_index_in_master)
-                    @clues[code_index_in_master] = " (*) "
-                else
-                    @clues[code_index_in_master] = " ( ) "
-                end
-            end
+
+
         end
-        puts "-#{@clues.values.join}"
-        print @clue_correct_place
-        puts ""
-        print @clue_incorrect_place
+        puts "-#{@@cracker.clues.values.join}"
+        puts 
+        print @@cracker.clues
         puts ""
     end
     
@@ -80,9 +71,11 @@ class Game
     class Cracker
         @guess_codes = Array.new(3, 1)
         attr_reader :guess_codes
-        def initialize(player_class, clues)
+        attr_reader :clues
+        def initialize(player_class)
             @@player = player_class.new()
-            @clues = clues
+            @clues = {}
+
         end
 
         def get_number
@@ -125,9 +118,7 @@ class Computer
     end
 
     def guess_secret_code(guess_codes, clues)
-        if(clues.length == 0)
-            return Array.new(4 ,random_number())
-        end
+        return Array.new(4 ,random_number())
     end
 
     def random_number

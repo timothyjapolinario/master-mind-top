@@ -44,19 +44,30 @@ class Game
         print "Guessed Code is: "
         @@cracker.guess_codes.each_with_index do |code, index|
             print "-#{code}"
-
-
         end
-        puts "-#{@@cracker.clues.values.join}"
-        puts 
-        print @@cracker.clues
+        get_clues()
+        puts "-#{@@cracker.clues.join}"
         puts ""
     end
     
     def secret_codes_guessed?
         return (@@master.secret_codes == @@cracker.guess_codes)
     end
-
+    def get_clues
+        @@cracker.clues.clear
+        @@master.secret_codes.each_with_index do|code, index|
+            code_index = @@cracker.guess_codes.index(code)
+            if(code_index)
+                if(@@cracker.guess_codes[index] == code)
+                    @@cracker.clues.push(" (*) ")
+                else
+                    @@cracker.clues.push(" ( ) ")
+                end
+                @@cracker.guess_codes[code_index] = 0
+            end
+        end
+        
+    end
     class Master
         attr_reader :secret_codes
         def initialize(player_class)
@@ -74,8 +85,7 @@ class Game
         attr_reader :clues
         def initialize(player_class)
             @@player = player_class.new()
-            @clues = {}
-
+            @clues = Array.new(4,0)
         end
 
         def get_number
@@ -85,7 +95,7 @@ class Game
 
         def guess_secret_code
             puts "Cracker is guessing the codes"
-            @guess_codes = @@player.guess_secret_code(@guess_codes, @clues)
+            @guess_codes = @@player.get_number
         end
     end
 end
@@ -117,7 +127,7 @@ class Computer
         return all_number.split("")
     end
 
-    def guess_secret_code(guess_codes, clues)
+    def guess_secret_code(guess_codes)
         return Array.new(4 ,random_number())
     end
 

@@ -1,6 +1,6 @@
 require 'pry-byebug'
 class Game
-    @@rounds = 11
+    @@round = 1
     def initialize(player_1_class, player_2_class)
         set_players(player_1_class, player_2_class)
         #print @@master.secret_codes
@@ -26,14 +26,15 @@ class Game
     end
 
     def play_game
-        while(@@rounds > 0)
+        while(@@round <= 11)
+            puts "ROUND #{@@round}"
             @@cracker.guess_secret_code
             give_feedback()
             if(secret_codes_guessed?)
                 puts "THE CODE HAS BEEN CRACKED!"
                 return
             end
-            @@rounds -= 1
+            @@round += 1
         end
         puts "THE CODE DIDN'T BREAK"
         print @@master.secret_codes
@@ -46,7 +47,7 @@ class Game
             print "-#{code}"
         end
         get_clues()
-        puts "-#{@@cracker.clues.join}"
+        puts "-#{@@cracker.clues_correct_position.join}#{@@cracker.clues_incorrect_position.join}"
         puts ""
     end
     
@@ -54,14 +55,15 @@ class Game
         return (@@master.secret_codes == @@cracker.guess_codes)
     end
     def get_clues
-        @@cracker.clues.clear
+        @@cracker.clues_correct_position.clear
+        @@cracker.clues_incorrect_position.clear
         @@master.secret_codes.each_with_index do|code, index|
             code_index = @@cracker.guess_codes.index(code)
             if(code_index)
                 if(@@cracker.guess_codes[index] == code)
-                    @@cracker.clues.push(" (*) ")
+                    @@cracker.clues_correct_position.push(" (*) ")
                 else
-                    @@cracker.clues.push(" ( ) ")
+                    @@cracker.clues_incorrect_position.push(" ( ) ")
                 end
                 @@cracker.guess_codes[code_index] = 0
             end
@@ -82,10 +84,12 @@ class Game
     class Cracker
         @guess_codes = Array.new(3, 1)
         attr_reader :guess_codes
-        attr_reader :clues
+        attr_reader :clues_correct_position
+        attr_reader :clues_incorrect_position
         def initialize(player_class)
             @@player = player_class.new()
-            @clues = Array.new(4,0)
+            @clues_correct_position = Array.new(4,0)
+            @clues_incorrect_position = Array.new(4,0)
         end
 
         def get_number
@@ -127,7 +131,7 @@ class Computer
         return all_number.split("")
     end
 
-    def guess_secret_code(guess_codes)
+    def guess_secret_code()
         return Array.new(4 ,random_number())
     end
 
